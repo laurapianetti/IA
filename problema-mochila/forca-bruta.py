@@ -23,7 +23,7 @@ def mochila(peso_mochila, peso_obj, valor_obj, n):
         else:
             return (valor_sem, peso_sem)
 
-def main():
+if __name__ == "__main__":
 
   # definindo as variáveis do problema
   capacidade_mochila = 30
@@ -47,6 +47,3 @@ def main():
   print(f"Soma dos pesos: {peso_total}")
   print(f"Soma dos valores: {valor_total}")
   print(f"Tempo de execução: {fim - inicio}")
-
-if __name__ == "__main__":
-  main()
