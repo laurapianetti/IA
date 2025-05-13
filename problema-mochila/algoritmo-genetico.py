@@ -1,5 +1,9 @@
 import random
 import time
+import matplotlib.pyplot as plt
+
+melhores_fitness = []
+fitness_medio = []
 
 # Função para gerar a população inicial (aleatoriamente)
 def populacao_inicial(tamanho_populacao, tamanho_individuo, itens, peso_mochila):
@@ -52,8 +56,10 @@ def nova_geracao(populacao, taxa_mutacao, tamanho_torneio, itens, peso_mochila):
     while len(nova_populacao) < len(populacao):
         pais = selecao_torneio(populacao, tamanho_torneio, itens, peso_mochila)
         filhos = recombinacao(pais[0], pais[1])
-        nova_populacao.append(mutacao(filhos[0], taxa_mutacao))
-        nova_populacao.append(mutacao(filhos[1], taxa_mutacao))
+        for filho in filhos:
+            filho_mutado = mutacao(filho, taxa_mutacao)
+            if calcular_valor_peso(filho_mutado, itens)[0] <= peso_mochila:
+                nova_populacao.append(filho_mutado)
     return nova_populacao
 
 # Função para calcular o valor total e o peso total de um indivíduo
@@ -65,8 +71,16 @@ def calcular_valor_peso(individuo, itens):
 # Função principal do algoritmo genético
 def algoritmo_genetico(tamanho_populacao, tamanho_individuo, itens, peso_mochila, taxa_mutacao, tamanho_torneio, geracoes):
     populacao = populacao_inicial(tamanho_populacao, tamanho_individuo, itens, peso_mochila)
+    
+    # Gerando uma nova população
     for _ in range(geracoes):
         populacao = nova_geracao(populacao, taxa_mutacao, tamanho_torneio, itens, peso_mochila)
+    
+        # Calculando fitness máximo e médio da população
+        fitness_geracao = [fitness(ind, itens, peso_mochila) for ind in populacao]
+        melhores_fitness.append(max(fitness_geracao))
+        fitness_medio.append(sum(fitness_geracao) / len(fitness_geracao))
+    
     melhor_individuo = max(populacao, key=lambda ind: fitness(ind, itens, peso_mochila))
     return melhor_individuo
 
@@ -104,3 +118,12 @@ if __name__ == "__main__":
     print(f"Soma dos pesos: {peso_total}")
     print(f"Soma dos valores: {valor_total}")
     print(f"Tempo de execução: {fim - inicio}")
+
+    plt.plot(melhores_fitness, label='Melhor fitness')
+    plt.plot(fitness_medio, label='Fitness médio')
+    plt.xlabel('Geração')
+    plt.ylabel('Fitness')
+    plt.title('Evolução do fitness por geração')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
