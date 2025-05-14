@@ -46,4 +46,4 @@ if __name__ == "__main__":
 
   print(f"Soma dos pesos: {peso_total}")
   print(f"Soma dos valores: {valor_total}")
-  print(f"Tempo de execução: {fim - inicio}")
+  print(f"Tempo de execução: {fim - inicio:.4f}")

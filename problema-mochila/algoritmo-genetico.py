@@ -117,8 +117,10 @@ if __name__ == "__main__":
 
     print(f"Soma dos pesos: {peso_total}")
     print(f"Soma dos valores: {valor_total}")
-    print(f"Tempo de execução: {fim - inicio}")
+    print(f"Tempo de execução: {fim - inicio:.4f}")
 
+    fig = plt.figure()
+    fig.canvas.manager.set_window_title('Algoritmo Genético - Problema da Mochila')
     plt.plot(melhores_fitness, label='Melhor fitness')
     plt.plot(fitness_medio, label='Fitness médio')
     plt.xlabel('Geração')
