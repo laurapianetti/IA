@@ -2,6 +2,7 @@ import random
 import time
 import matplotlib.pyplot as plt
 
+# Variáveis globais para os parametros do gráfico
 melhores_fitness = []
 fitness_medio = []
 
@@ -93,7 +94,6 @@ def criar_itens(quantidade_itens):
         itens.append((peso, valor))
     return itens
 
-# Main
 if __name__ == "__main__":
     # Definindo os parâmetros do problema
     capacidade_mochila = 30
@@ -119,6 +119,7 @@ if __name__ == "__main__":
     print(f"Soma dos valores: {valor_total}")
     print(f"Tempo de execução: {fim - inicio:.4f}")
 
+    # Plotando os resultados da evolução do fitness em um gráfico
     fig = plt.figure()
     fig.canvas.manager.set_window_title('Algoritmo Genético - Problema da Mochila')
     plt.plot(melhores_fitness, label='Melhor fitness')
