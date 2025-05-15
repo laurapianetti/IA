@@ -9,17 +9,20 @@ melhores_fitness = []
 fitness_medio = []
 populacoes_geracoes = []
 
-# Função Alpine2
-def alpine2(x):
-    return np.prod(np.sqrt(x) * np.sin(x))
+# Função Schaffer's
+def schaffers(x):
+    numerador = np.sin(np.sqrt(x[0]**2 + x[1]**2))**2 - 0.5
+    denominador = (1 + 0.001 * (x[0]**2 + x[1]**2))**2
+    return 0.5 - numerador / denominador
 
 # Função para definir a população inicial (aleatoriamente)
-def populacao_inicial(tamanho_populacao, num_dimensoes):
-    return [np.random.uniform(0.1, 10, num_dimensoes) for _ in range(tamanho_populacao)]
+def populacao_inicial(tamanho_populacao):
+    individuo = [random.random() for _ in range(2)]
+    return [individuo for _ in range(tamanho_populacao)]
 
 # Função para definir o fitness (própria função)
 def fitness(individuo):
-    return alpine2(individuo)
+    return schaffers(individuo)
 
 # Função para fazer a seleção dos pais (torneio)
 def selecao_torneio(populacao, tamanho_torneio):
@@ -57,8 +60,8 @@ def nova_geracao(populacao, taxa_mutacao, tamanho_torneio):
     return nova_populacao
 
 # Função principal do Algoritmo Genético
-def algoritmo_genetico(tamanho_populacao, num_dimensoes, num_geracoes, taxa_mutacao, tamanho_torneio):
-    populacao = populacao_inicial(tamanho_populacao, num_dimensoes)
+def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_mutacao, tamanho_torneio):
+    populacao = populacao_inicial(tamanho_populacao)
 
     for _ in range(num_geracoes):
         populacao = nova_geracao(populacao, taxa_mutacao, tamanho_torneio)
@@ -84,39 +87,59 @@ if __name__ == "__main__":
     inicio = time.time() # marca o tempo de execução
 
     # Executando o algoritmo genético
-    melhor_solucao = algoritmo_genetico(tamanho_populacao, num_dimensoes, num_geracoes, taxa_mutacao, tamanho_torneio)
+    melhor_solucao = algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_mutacao, tamanho_torneio)
 
     fim = time.time() # marca o tempo de execução
 
     melhor_solucao = np.round(melhor_solucao, 4)
-    print(f"Para n = {num_dimensoes} o máximo é de {alpine2(melhor_solucao):.4f} em x*={melhor_solucao}")
+    print(f"A maximização de f(x, y) = {schaffers(melhor_solucao):.4f} no ponto x*={melhor_solucao}")
     print(f"Tempo de execução: {fim - inicio:.4f} segundos")
 
     # Gerar o vídeo da convergência com os indivíduos ao longo das gerações
-    fig, ax = plt.subplots()
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 10)
+    fig, ax = plt.subplots(figsize=(6,6))
+    fig.canvas.manager.set_window_title('Algoritmo Genético - Maximização Schaffers F6')
+    ax.set_xlim(0.1, 10)
+    ax.set_ylim(0.1, 10)
     ax.set_xlabel('x1')
     ax.set_ylabel('x2')
 
-    pontos, = ax.plot([], [], 'o', label='Indivíduos', color='blue')
-    ax.legend(loc='upper right') 
+    # Plota as curvas de nível da função Schaffer's F6
+    xs = np.linspace(0.1, 10, 300)
+    ys = np.linspace(0.1, 10, 300)
+    X, Y = np.meshgrid(xs, ys)
+    Z = np.sqrt(X)*np.sin(X) * np.sqrt(Y)*np.sin(Y)
+    contours = ax.contour(
+        X, Y, Z,
+        levels=20,     
+        cmap='viridis',
+        alpha=0.6
+    )
+    fig.colorbar(contours, ax=ax, label='schaffers(x1,x2)')
 
+    # Plota os pontos da população (inicialmente vazios)
+    pontos, = ax.plot([], [], 'o', color='blue', ms=4, label='Indivíduos')
+    ax.legend(loc='upper right')
+
+    # Função de atualização dos pontos a cada frame
     def atualizar(frame):
-        geracao = populacoes_geracoes[frame]
-        x1 = [ind[0] for ind in geracao]
-        x2 = [ind[1] for ind in geracao]
+        ger = populacoes_geracoes[frame]
+        x1 = [ind[0] for ind in ger]
+        x2 = [ind[1] for ind in ger]
         pontos.set_data(x1, x2)
-        ax.set_title(f'Evolução dos Indivíduos - Geração {frame + 1} de {num_geracoes}')
+        ax.set_title(f'Geração {frame+1} de {num_geracoes}')
         return pontos,
 
-    anim = FuncAnimation(fig, atualizar, frames=num_geracoes, interval=200, blit=False)
-
-    anim.save('evolucao_individuos.mp4', writer='ffmpeg')
+    # Monta e salva a animação
+    anim = FuncAnimation(fig, atualizar,
+                         frames=num_geracoes,
+                         interval=200,
+                         blit=False)
+    anim.save('evolucao_com_contornos.mp4', writer='ffmpeg', dpi=200)
     plt.show()
 
     # Gerar o gráfico da evolução do fitness médio e do melhor fitness
     plt.figure(figsize=(8, 5))
+    plt.canvas.manager.set_window_title('Algoritmo Genético - Maximização Schaffers F6')
     plt.plot(range(1, num_geracoes+1), melhores_fitness,   label='Melhor Fitness')
     plt.plot(range(1, num_geracoes+1), fitness_medio,      label='Fitness Médio')
     plt.xlabel('Geração')
