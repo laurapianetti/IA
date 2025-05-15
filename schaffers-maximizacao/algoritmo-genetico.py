@@ -17,8 +17,8 @@ def schaffers(x):
 
 # Função para definir a população inicial (aleatoriamente)
 def populacao_inicial(tamanho_populacao):
-    individuo = [random.random() for _ in range(2)]
-    return [individuo for _ in range(tamanho_populacao)]
+    return [[random.uniform(-10, 10), random.uniform(-10, 10)] 
+            for _ in range(tamanho_populacao)]
 
 # Função para definir o fitness (própria função)
 def fitness(individuo):
@@ -42,7 +42,7 @@ def recombinacao(pai1, pai2, alfa=0.3):
     return np.random.uniform(menor, maior)
 
 # Função para aplicar mutação em um indivíduo (perturbação gaussiana)
-def mutacao(individuo, taxa_mutacao, sigma=0.5):
+def mutacao(individuo, taxa_mutacao, sigma=1.0):
     for i in range(len(individuo)):
         if random.random() < taxa_mutacao:
             individuo[i] += np.random.normal(0, sigma) 
@@ -79,9 +79,9 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_mutacao, tamanho_to
 if __name__ == "__main__":
     # Definindo os parâmetros do algoritmo genético
     num_dimensoes = 2
-    tamanho_populacao = 100
-    num_geracoes = 40
-    taxa_mutacao = 0.1
+    tamanho_populacao = 200
+    num_geracoes = 100
+    taxa_mutacao = 0.2
     tamanho_torneio = 3
 
     inicio = time.time() # marca o tempo de execução
@@ -96,50 +96,54 @@ if __name__ == "__main__":
     print(f"Tempo de execução: {fim - inicio:.4f} segundos")
 
     # Gerar o vídeo da convergência com os indivíduos ao longo das gerações
-    fig, ax = plt.subplots(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(8, 8))
     fig.canvas.manager.set_window_title('Algoritmo Genético - Maximização Schaffers F6')
-    ax.set_xlim(0.1, 10)
-    ax.set_ylim(0.1, 10)
-    ax.set_xlabel('x1')
-    ax.set_ylabel('x2')
+    ax.set_xlim(-10, 10)  # Eixo x de -10 a 10
+    ax.set_ylim(-10, 10)  # Eixo y de -10 a 10
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.axhline(0, color='black', linewidth=0.5)  # Linha horizontal no eixo x
+    ax.axvline(0, color='black', linewidth=0.5)  # Linha vertical no eixo y
 
-    # Plota as curvas de nível da função Schaffer's F6
-    xs = np.linspace(0.1, 10, 300)
-    ys = np.linspace(0.1, 10, 300)
+    # Cálculo das curvas de nível para todos os quadrantes
+    xs = np.linspace(-10, 10, 300)
+    ys = np.linspace(-10, 10, 300)
     X, Y = np.meshgrid(xs, ys)
-    Z = np.sqrt(X)*np.sin(X) * np.sqrt(Y)*np.sin(Y)
+    Z = 0.5 - (np.sin(np.sqrt(X**2 + Y**2))**2 - 0.5) / (1 + 0.001*(X**2 + Y**2))**2
+
+    # Plot das curvas de nível
     contours = ax.contour(
         X, Y, Z,
-        levels=20,     
+        levels=20,
         cmap='viridis',
         alpha=0.6
     )
-    fig.colorbar(contours, ax=ax, label='schaffers(x1,x2)')
+    fig.colorbar(contours, ax=ax, label='schaffers(x,y)')
 
-    # Plota os pontos da população (inicialmente vazios)
+    # Plota os pontos da população (todos com a mesma cor)
     pontos, = ax.plot([], [], 'o', color='blue', ms=4, label='Indivíduos')
     ax.legend(loc='upper right')
 
     # Função de atualização dos pontos a cada frame
     def atualizar(frame):
         ger = populacoes_geracoes[frame]
-        x1 = [ind[0] for ind in ger]
-        x2 = [ind[1] for ind in ger]
-        pontos.set_data(x1, x2)
+        x = [ind[0] for ind in ger]
+        y = [ind[1] for ind in ger]
+        pontos.set_data(x, y)
         ax.set_title(f'Geração {frame+1} de {num_geracoes}')
         return pontos,
 
-    # Monta e salva a animação
+    # Cria e salva a animação
     anim = FuncAnimation(fig, atualizar,
-                         frames=num_geracoes,
-                         interval=200,
-                         blit=False)
+                        frames=num_geracoes,
+                        interval=200,
+                        blit=False)
     anim.save('evolucao_com_contornos.mp4', writer='ffmpeg', dpi=200)
     plt.show()
 
     # Gerar o gráfico da evolução do fitness médio e do melhor fitness
-    plt.figure(figsize=(8, 5))
-    plt.canvas.manager.set_window_title('Algoritmo Genético - Maximização Schaffers F6')
+    fig = plt.figure(figsize=(8, 5))
+    fig.canvas.manager.set_window_title('Algoritmo Genético - Maximização Schaffers F6')
     plt.plot(range(1, num_geracoes+1), melhores_fitness,   label='Melhor Fitness')
     plt.plot(range(1, num_geracoes+1), fitness_medio,      label='Fitness Médio')
     plt.xlabel('Geração')
