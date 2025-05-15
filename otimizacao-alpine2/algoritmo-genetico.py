@@ -30,18 +30,20 @@ def selecao_torneio(populacao, tamanho_torneio):
         pais.append(torneio[0])
     return pais
 
-# Função para cruzar dois indivíduos (por média)
-def recombinacao(pai1, pai2):
-    
-    filho = []
-    for i in range(len(pai1)):
-        filho.append((pai1[i] + pai2[i]) / 2)
-    return filho
+# Função para cruzar dois indivíduos 
+def recombinacao(pai1, pai2, alpha=0.3):
+    p1, p2 = np.array(pai1), np.array(pai2)
+    d = np.abs(p1 - p2)
+    low = np.minimum(p1, p2) - alpha * d
+    high = np.maximum(p1, p2) + alpha * d
+    return np.random.uniform(low, high)
 
-# Função para aplicar mutação em um indivíduo (soma um número aleatório)
-def mutacao(individuo, taxa_mutacao):
-    mutacao = np.random.uniform(-1, 1, len(individuo)) * taxa_mutacao
-    individuo += mutacao
+# Função para aplicar mutação em um indivíduo (perturbação gaussiana)
+def mutacao(individuo, taxa_mutacao, sigma=0.5):
+    for i in range(len(individuo)):
+        if random.random() < taxa_mutacao:
+            individuo[i] += np.random.normal(0, sigma)
+            individuo[i] = np.clip(individuo[i], 0.1, 10)
     return individuo
 
 # Função para criar a nova geração
@@ -60,12 +62,8 @@ def algoritmo_genetico(tamanho_populacao, num_dimensoes, num_geracoes, taxa_muta
 
     for _ in range(num_geracoes):
         populacao = nova_geracao(populacao, taxa_mutacao, tamanho_torneio)
-
         # Salva a população de cada geração
         populacoes_geracoes.append(populacao)
-        for geracao in range(num_geracoes):
-            populacoes_geracoes.append(populacao)
-            populacao = nova_geracao(populacao, taxa_mutacao, tamanho_torneio)
 
         # Calcula o fitness máximo e médio da população
         fitness_geracao = [fitness(individuo) for individuo in populacao]
@@ -78,9 +76,9 @@ def algoritmo_genetico(tamanho_populacao, num_dimensoes, num_geracoes, taxa_muta
 if __name__ == "__main__":
     # Definindo os parâmetros do algoritmo genético
     num_dimensoes = 2
-    tamanho_populacao = 30
+    tamanho_populacao = 100
     num_geracoes = 50
-    taxa_mutacao = 0.05
+    taxa_mutacao = 0.1
     tamanho_torneio = 3
 
     inicio = time.time() # marca o tempo de execução
@@ -95,7 +93,6 @@ if __name__ == "__main__":
     print(f"Tempo de execução: {fim - inicio:.4f} segundos")
 
     # Gerar o vídeo da convergência com os indivíduos ao longo das gerações
-
     fig, ax = plt.subplots()
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 10)
@@ -105,18 +102,15 @@ if __name__ == "__main__":
     pontos, = ax.plot([], [], 'o', label='Indivíduos', color='blue')
     ax.legend()
 
-    # Executar o algoritmo genético modificado
-    melhor_solucao = algoritmo_genetico(tamanho_populacao, num_dimensoes, num_geracoes, taxa_mutacao, tamanho_torneio)
-
     def atualizar(frame):
         geracao = populacoes_geracoes[frame]
-        x1 = [individuo[0] for individuo in geracao]
-        x2 = [individuo[1] for individuo in geracao]
+        x1 = [ind[0] for ind in geracao]
+        x2 = [ind[1] for ind in geracao]
         pontos.set_data(x1, x2)
         ax.set_title(f'Evolução dos Indivíduos - Geração {frame + 1} de {num_geracoes}')
         return pontos,
 
-    anim = FuncAnimation(fig, atualizar, frames=num_geracoes, interval=100, blit=True)
+    anim = FuncAnimation(fig, atualizar, frames=num_geracoes, interval=200, blit=False)
 
     anim.save('evolucao_individuos.mp4', writer='ffmpeg')
     plt.show()
