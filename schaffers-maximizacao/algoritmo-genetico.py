@@ -46,17 +46,21 @@ def mutacao(individuo, taxa_mutacao, sigma=1.0):
     for i in range(len(individuo)):
         if random.random() < taxa_mutacao:
             individuo[i] += np.random.normal(0, sigma) 
-            individuo[i] = np.clip(individuo[i], 0.1, 10)
+            individuo[i] = np.clip(individuo[i], -10, 10)
     return individuo
 
 # Função para criar a nova geração
 def nova_geracao(populacao, taxa_mutacao, tamanho_torneio):
-    nova_populacao = []
+    populacao.sort(key=fitness, reverse=True)
+    elite = populacao[:2]  # Preserva os 2 melhores
+    
+    nova_populacao = elite.copy()
     while len(nova_populacao) < len(populacao):
         pais = selecao_torneio(populacao, tamanho_torneio)
         filho = recombinacao(pais[0], pais[1])
         filho_mutado = mutacao(filho, taxa_mutacao)
         nova_populacao.append(filho_mutado)
+    
     return nova_populacao
 
 # Função principal do Algoritmo Genético
@@ -80,7 +84,7 @@ if __name__ == "__main__":
     # Definindo os parâmetros do algoritmo genético
     num_dimensoes = 2
     tamanho_populacao = 200
-    num_geracoes = 100
+    num_geracoes = 70
     taxa_mutacao = 0.2
     tamanho_torneio = 3
 
