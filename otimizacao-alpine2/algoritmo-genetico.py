@@ -31,12 +31,12 @@ def selecao_torneio(populacao, tamanho_torneio):
     return pais
 
 # Função para cruzar dois indivíduos (crossover BLX‑α)
-def recombinacao(pai1, pai2, alpha=0.3):
+def recombinacao(pai1, pai2, alfa=0.3):
     p1, p2 = np.array(pai1), np.array(pai2)
     d = np.abs(p1 - p2)
-    low = np.minimum(p1, p2) - alpha * d
-    high = np.maximum(p1, p2) + alpha * d
-    return np.random.uniform(low, high)
+    menor = np.minimum(p1, p2) - alfa * d
+    maior = np.maximum(p1, p2) + alfa * d
+    return np.random.uniform(menor, maior)
 
 # Função para aplicar mutação em um indivíduo (perturbação gaussiana)
 def mutacao(individuo, taxa_mutacao, sigma=0.5):
