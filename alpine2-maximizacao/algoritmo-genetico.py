@@ -131,7 +131,7 @@ if __name__ == "__main__":
                          frames=num_geracoes,
                          interval=200,
                          blit=False)
-    anim.save('evolucao_com_contornos.mp4', writer='ffmpeg', dpi=200)
+    anim.save('evolucao_individuos.mp4', writer='ffmpeg', dpi=200)
     plt.show()
 
     # Gerar o gráfico da evolução do fitness médio e do melhor fitness
