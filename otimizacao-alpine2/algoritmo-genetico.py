@@ -30,7 +30,7 @@ def selecao_torneio(populacao, tamanho_torneio):
         pais.append(torneio[0])
     return pais
 
-# Função para cruzar dois indivíduos 
+# Função para cruzar dois indivíduos (crossover BLX‑α)
 def recombinacao(pai1, pai2, alpha=0.3):
     p1, p2 = np.array(pai1), np.array(pai2)
     d = np.abs(p1 - p2)
@@ -42,7 +42,7 @@ def recombinacao(pai1, pai2, alpha=0.3):
 def mutacao(individuo, taxa_mutacao, sigma=0.5):
     for i in range(len(individuo)):
         if random.random() < taxa_mutacao:
-            individuo[i] += np.random.normal(0, sigma)
+            individuo[i] += np.random.normal(0, sigma) 
             individuo[i] = np.clip(individuo[i], 0.1, 10)
     return individuo
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # Definindo os parâmetros do algoritmo genético
     num_dimensoes = 2
     tamanho_populacao = 100
-    num_geracoes = 50
+    num_geracoes = 40
     taxa_mutacao = 0.1
     tamanho_torneio = 3
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     ax.set_ylabel('x2')
 
     pontos, = ax.plot([], [], 'o', label='Indivíduos', color='blue')
-    ax.legend()
+    ax.legend(loc='upper right') 
 
     def atualizar(frame):
         geracao = populacoes_geracoes[frame]
@@ -113,4 +113,19 @@ if __name__ == "__main__":
     anim = FuncAnimation(fig, atualizar, frames=num_geracoes, interval=200, blit=False)
 
     anim.save('evolucao_individuos.mp4', writer='ffmpeg')
+    plt.show()
+
+    # Gerar o gráfico da evolução do fitness médio e do melhor fitness
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(1, num_geracoes+1), melhores_fitness,   label='Melhor Fitness')
+    plt.plot(range(1, num_geracoes+1), fitness_medio,      label='Fitness Médio')
+    plt.xlabel('Geração')
+    plt.ylabel('Fitness')
+    plt.title('Evolução do Fitness ao Longo das Gerações')
+    plt.legend(loc='best')
+    plt.grid(True)
+    plt.tight_layout()
+
+    plt.savefig('evolucao_fitness.png', dpi=300)
+
     plt.show()
