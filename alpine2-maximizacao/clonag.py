@@ -43,7 +43,6 @@ def hipermutacao(anticorpos, afinidades, beta=0.1):
         anticorpos_mutada.append(anticorpos[i] + mutacao)
 
     return np.array(anticorpos_mutada)
-    
 
 # Função para gerar os indivíduos que faltam após clonagem
 def nova_geracao(num_anticorpos, total_clones, num_dimensoes):
