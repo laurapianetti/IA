@@ -16,6 +16,7 @@ def anticorpos_inicial(num_anticorpos, num_dimensoes):
 def afinidades(anticorpos):
     return np.array([max(0, alpine2(anticorpo)) for anticorpo in anticorpos])
 
+# Seleciona M melhores anticorpos
 def selecao_melhores_afinidades(anticorpos, afinidades, m):
     indices = np.argsort(afinidades)[-m:]  # Seleciona os M maiores afinidades
     return anticorpos[indices], afinidades[indices]
