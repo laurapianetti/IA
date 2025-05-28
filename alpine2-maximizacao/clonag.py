@@ -10,14 +10,11 @@ def alpine2(x):
 
 # Função para definir a população inicial (aleatoriamente)
 def anticorpos_inicial(num_anticorpos, num_dimensoes):
-    return [np.random.uniform(0.1, 10, num_dimensoes) for _ in range(num_anticorpos)]
+    return np.array([np.random.uniform(0.1, 10, num_dimensoes) for _ in range(num_anticorpos)])
 
 # Função para definir afinidades (própria função)
 def afinidades(anticorpos):
-    afinidades = []
-    for anticorpo in anticorpos:
-        afinidades.append(alpine2(anticorpo))
-    return afinidades
+    return np.array([alpine2(anticorpo) for anticorpo in anticorpos])
 
 def selecao_melhores_afinidades(anticorpos, afinidades, m):
     indices = np.argsort(afinidades)[-m:]  # Seleciona os M maiores afinidades
@@ -27,9 +24,33 @@ def selecao_melhores_afinidades(anticorpos, afinidades, m):
 def clonagem(anticorpos, afinidades, total_clones):
     soma_afinidades = np.sum(afinidades)
     clones = []
+    clones_qtd = []
+    clones_qtd_int = []
+    soma = 0
+
+    # Calcula quantidade de clones em float e armazena
     for i in range(len(anticorpos)):
-        qtd_clones = int((afinidades[i] / soma_afinidades) * total_clones)
-        clones.extend([anticorpos[i]] * qtd_clones)
+        qtd = (afinidades[i] / soma_afinidades) * total_clones
+        soma += qtd
+        clones_qtd.append(qtd)
+        clones_qtd_int.append(int(qtd))
+
+    # Calcula quantos clones faltam
+    dif = round(total_clones - sum(clones_qtd_int))
+
+    # Pega as partes decimais para decidir quem recebe os clones restantes
+    partes_decimais = [q - int(q) for q in clones_qtd]
+    # Ordem decrescente
+    indices_desc = np.argsort(partes_decimais)[::-1]
+
+    # Distribui os clones faltantes para os anticorpos com maiores partes decimais
+    for i in range(dif):
+        clones_qtd_int[indices_desc[i]] += 1
+
+    # Gera os clones
+    for i in range(len(anticorpos)):
+        clones.extend([anticorpos[i]] * clones_qtd_int[i])
+
     return np.array(clones)
 
 # Hipermutação: anticorpos melhores tem mutação menor e piores tem mutação maior
@@ -63,7 +84,7 @@ def clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones):
     afin = afinidades(anticorpos)
     idx_melhor = np.argmax(afin)
     melhor_solucao = anticorpos[idx_melhor]
-    return melhor_solucao, idx_melhor
+    return melhor_solucao
 
 if __name__ == "__main__":
     num_dimensoes = 2
