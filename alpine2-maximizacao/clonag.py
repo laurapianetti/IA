@@ -14,7 +14,7 @@ def anticorpos_inicial(num_anticorpos, num_dimensoes):
 
 # Função para definir afinidades (própria função)
 def afinidades(anticorpos):
-    return np.array([alpine2(anticorpo) for anticorpo in anticorpos])
+    return np.array([max(0, alpine2(anticorpo)) for anticorpo in anticorpos])
 
 def selecao_melhores_afinidades(anticorpos, afinidades, m):
     indices = np.argsort(afinidades)[-m:]  # Seleciona os M maiores afinidades
@@ -54,14 +54,16 @@ def clonagem(anticorpos, afinidades, total_clones):
     return np.array(clones)
 
 # Hipermutação: anticorpos melhores tem mutação menor e piores tem mutação maior
-def hipermutacao(anticorpos, afinidades, beta=0.1):
+def hipermutacao(anticorpos, afinidades, beta=0.01):
     afin_max = np.max(afinidades)
     taxas_mutacao = (1 - (afinidades / afin_max)) * beta
     anticorpos_mutada = []
 
     for i in range(len(anticorpos)):
         mutacao = np.random.normal(0, taxas_mutacao[i], size=anticorpos[i].shape)
-        anticorpos_mutada.append(anticorpos[i] + mutacao)
+        novo = anticorpos[i] + mutacao
+        novo = np.clip(novo, 0.1, 10)  # Garante que x > 0
+        anticorpos_mutada.append(novo)
 
     return np.array(anticorpos_mutada)
 
@@ -88,10 +90,10 @@ def clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones):
 
 if __name__ == "__main__":
     num_dimensoes = 2
-    num_anticorpos = 50
-    num_geracoes = 40
-    m = 5
-    total_clones = 45
+    num_anticorpos = 300
+    num_geracoes = 300
+    m = 30
+    total_clones = 280
 
     inicio = time.time() # marca o tempo de execução
 
