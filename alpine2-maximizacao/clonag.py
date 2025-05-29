@@ -84,9 +84,10 @@ def clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones):
         novos = nova_geracao(num_anticorpos, total_clones, num_dimensoes)
         anticorpos = np.vstack((clones, novos))
 
-    afin = afinidades(anticorpos)
-    idx_melhor = np.argmax(afin)
-    melhor_solucao = anticorpos[idx_melhor]
+    # Encontra o anticorpo com a maior afinidade (melhor solução encontrada)
+    afinidades_vals = afinidades(anticorpos)
+    indice_melhor = np.argmax(afinidades_vals)
+    melhor_solucao = anticorpos[indice_melhor]
     return melhor_solucao
 
 if __name__ == "__main__":
