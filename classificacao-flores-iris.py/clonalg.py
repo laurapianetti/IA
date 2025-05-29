@@ -11,31 +11,14 @@ def populacao_inicial(tamanho_populacao):
         populacao.append(individuo)
     return np.array(populacao)
 
-# def afinidades(anticorpos, antigenos):
-#     afinidades = []
-#
-#     for individuo in anticorpos:
-#         predicoes = []
-#         for _ in range(len(antigenos.data)):
-#             # Calcula a distância do indivíduo para todos os antígenos
-#             distancias = np.linalg.norm(antigenos.data - individuo, axis=1)
-#             # Encontra o índice do antígeno mais próximo
-#             idx_mais_proximo = np.argmin(distancias)
-#             # Prediz a classe do mais próximo
-#             predicoes.append(antigenos.target[idx_mais_proximo])
-#         predicoes = np.array(predicoes)
-#         acertos = np.sum(predicoes == antigenos.target)
-#         afinidade = acertos / len(antigenos.target)  # porcentagem de acertos
-#         afinidades.append(afinidade)
-#     return np.array(afinidades)
-
+# Calcula afinidades dos anticorpos com base na porcentagem de acerto das classificações
 def afinidades(anticorpos, X, y):
     afinidades = []
 
     for individuo in anticorpos:
         predicoes = []
         for x in X:
-            # Calcula distâncias entre x (características do anígeno) e os 3 vetores do indivíduo
+            # Calcula distâncias entre x (características do antígeno) e os 3 vetores do indivíduo
             distancias = np.linalg.norm(individuo - x, axis=1)
             classe_previsao = np.argmin(distancias)
             predicoes.append(classe_previsao)   
@@ -136,9 +119,10 @@ if __name__ == "__main__":
 
     inicio = time.time() # marca o tempo de execução
 
-    iris = load_iris()
+    iris = load_iris() # Carrega o dataset Iris
     X = iris.data # Atributos (largura e comprimento das pétalas e sépalas)
     y = iris.target # Rótulos (espécies de flores)
+    
     # Dividir em treino e teste
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=42)
 
