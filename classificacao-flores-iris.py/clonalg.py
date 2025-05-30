@@ -2,6 +2,7 @@ import time
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 # População inicial corresponde aos anticorpos
 def populacao_inicial(tamanho_populacao):
@@ -135,3 +136,35 @@ if __name__ == "__main__":
     acuracia_teste = avaliar_solucao(melhor_solucao, X_test, y_test)
     print(f"Acurácia no conjunto de teste: {acuracia_teste:.4f}")
     print(f"Tempo de execução: {fim - inicio:.4f} segundos")
+
+    # Nomes das classes de flores
+    nomes_classes = iris.target_names
+    cores = ['r', 'g', 'b']
+
+    # Gráfico para SÉPALAS (atributos 0 e 1)
+    plt.figure(figsize=(8, 6))
+    for classe, cor in zip(np.unique(y), cores):
+        plt.scatter(X[y == classe, 0], X[y == classe, 1], label=nomes_classes[classe], alpha=0.5, color=cor)
+    for i, (vetor, cor) in enumerate(zip(melhor_solucao, cores)):
+        plt.arrow(0, 0, vetor[0], vetor[1], head_width=0.2, head_length=0.3, fc=cor, ec=cor, linewidth=2, length_includes_head=True)
+        plt.text(vetor[0], vetor[1], f'Protótipo {nomes_classes[i]}', fontsize=10, color=cor)
+    plt.xlabel('Comprimento da Sépala')
+    plt.ylabel('Largura da Sépala')
+    plt.title('Sépalas - Dados e Vetores Protótipos')
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+    # Gráfico para PÉTALAS (atributos 2 e 3)
+    plt.figure(figsize=(8, 6))
+    for classe, cor in zip(np.unique(y), cores):
+        plt.scatter(X[y == classe, 2], X[y == classe, 3], label=nomes_classes[classe], alpha=0.5, color=cor)
+    for i, (vetor, cor) in enumerate(zip(melhor_solucao, cores)):
+        plt.arrow(0, 0, vetor[2], vetor[3], head_width=0.2, head_length=0.3, fc=cor, ec=cor, linewidth=2, length_includes_head=True)
+        plt.text(vetor[2], vetor[3], f'Protótipo {nomes_classes[i]}', fontsize=10, color=cor)
+    plt.xlabel('Comprimento da Pétala')
+    plt.ylabel('Largura da Pétala')
+    plt.title('Pétalas - Dados e Vetores Protótipos')
+    plt.legend()
+    plt.grid()
+    plt.show()
