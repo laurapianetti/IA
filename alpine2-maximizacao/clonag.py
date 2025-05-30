@@ -76,6 +76,7 @@ def nova_geracao(num_anticorpos, total_clones, num_dimensoes):
 # Função principal do Algoritmo Imunológico
 def clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones):
     anticorpos = anticorpos_inicial(num_anticorpos, num_dimensoes)
+    historico_afinidade = [] # Armazena informações para fazer o gráfico
 
     for _ in range(num_geracoes):
         melhores_anti, afinidades_melhores = selecao_melhores_afinidades(anticorpos, afinidades(anticorpos), m)
@@ -84,11 +85,13 @@ def clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones):
         novos = nova_geracao(num_anticorpos, total_clones, num_dimensoes)
         anticorpos = np.vstack((clones, novos))
 
+        afinidades_vals = afinidades(anticorpos)
+        historico_afinidade.append(np.max(afinidades_vals))  # Armazena a afinidade máxima de cada geração
+
     # Encontra o anticorpo com a maior afinidade (melhor solução encontrada)
-    afinidades_vals = afinidades(anticorpos)
     indice_melhor = np.argmax(afinidades_vals)
     melhor_solucao = anticorpos[indice_melhor]
-    return melhor_solucao
+    return melhor_solucao, historico_afinidade
 
 if __name__ == "__main__":
     num_dimensoes = 2
@@ -100,9 +103,19 @@ if __name__ == "__main__":
     inicio = time.time() # marca o tempo de execução
 
     # Executando o algoritmo imunológico
-    melhor_solucao = clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones)
+    melhor_solucao, historico_afinidade = clonalg(num_anticorpos, num_dimensoes, num_geracoes, m, total_clones)
 
     fim = time.time() # marca o tempo de execução
 
     print(f"Para n = {num_dimensoes} o máximo é de {alpine2(melhor_solucao):.4f} em x*={melhor_solucao}")
     print(f"Tempo de execução: {fim - inicio:.4f} segundos")
+
+    # Plotando o gráfico da evolução das afinidades
+    fig = plt.figure(figsize=(8, 5))
+    fig.canvas.manager.set_window_title('Algoritmo Imunológico - Maximização Alpine2')
+    plt.plot(historico_afinidade)
+    plt.xlabel('Geração')
+    plt.ylabel('Afinidade Máxima')
+    plt.title('Evolução da Afinidade Máxima por Geração')
+    plt.grid()
+    plt.show()
