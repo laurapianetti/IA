@@ -118,4 +118,5 @@ if __name__ == "__main__":
     plt.ylabel('Afinidade Máxima')
     plt.title('Evolução da Afinidade Máxima por Geração')
     plt.grid()
+    plt.savefig('evolucao_afinidade.png', dpi=300)
     plt.show()
