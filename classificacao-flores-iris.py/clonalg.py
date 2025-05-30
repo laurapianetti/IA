@@ -41,12 +41,10 @@ def clonagem(anticorpos, afinidades, total_clones):
     clones = []
     clones_qtd = []
     clones_qtd_int = []
-    soma = 0
 
     # Calcula quantidade de clones em float e armazena
     for i in range(len(anticorpos)):
         qtd = (afinidades[i] / soma_afinidades) * total_clones
-        soma += qtd
         clones_qtd.append(qtd)
         clones_qtd_int.append(int(qtd))
 
