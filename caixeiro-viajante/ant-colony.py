@@ -34,8 +34,9 @@ def calcula_distancia_total(matriz_dist, caminho):
     dist += float(matriz_dist[caminho[-1]][caminho[0]])  # Volta para a cidade inicial 
     return dist
 
-def calcula_deposito_feromonio(caminho, feromonio_excretado):
-    for _ in range(len(caminho) - 1):
+def calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado):
+    # para cada aresta, se pertence ao caminho, calcula o depósito de feromônio
+ 
         
     
 
