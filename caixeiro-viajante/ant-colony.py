@@ -15,6 +15,7 @@ def preenche_matriz_dist(arq):
 def inicializa_feromonio(num_cidades):
     return np.ones((num_cidades, num_cidades))
 
+# Calcula a probabilidade de transição entre cidades por meio da fórmula
 def calcula_prob_transicao(matriz_dist, matriz_feromonio, cidade_atual, cidades_nao_visitadas):
     num_cidades = len(matriz_dist)
     prob_transicao = np.zeros(num_cidades)
@@ -23,23 +24,30 @@ def calcula_prob_transicao(matriz_dist, matriz_feromonio, cidade_atual, cidades_
         dist = float(matriz_dist[cidade_atual][i])
         if dist > 0:  # Evita divisão por zero
             prob_transicao[i] = matriz_feromonio[cidade_atual][i] / dist
-
+        
     soma = np.sum(prob_transicao)
     if soma > 0:
         prob_transicao = prob_transicao / soma
     return prob_transicao
 
+# Calcula a distância total do caminho percorrido pelas formigas
 def calcula_distancia_total(matriz_dist, caminho):
     dist = sum(float(matriz_dist[caminho[i]][caminho[i + 1]]) for i in range(len(caminho) - 1))
     dist += float(matriz_dist[caminho[-1]][caminho[0]])  # Volta para a cidade inicial 
     return dist
 
-def calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado):
-    # para cada aresta, se pertence ao caminho, calcula o depósito de feromônio
- 
-        
+# Calcula o depósito de feromônio deixado pelas formigas em cada aresta do caminho percorrido
+def calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado, matriz_dist):
+    matriz_deposito = np.zeros((num_cidades, num_cidades))
+    for i in range(len(caminho) - 1):
+        cidade_atual = caminho[i]
+        proxima_cidade = caminho[i + 1]
+        matriz_deposito[cidade_atual][proxima_cidade] += feromonio_excretado / float(matriz_dist[cidade_atual][proxima_cidade])
+        matriz_deposito[proxima_cidade][cidade_atual] += feromonio_excretado / float(matriz_dist[proxima_cidade][cidade_atual])
     
-
+    return matriz_deposito
+        
+# Atualiza o nível de feromônio na matriz com base na taxa de evaporação e no depósito de feromônio
 def atualiza_nivel_feromonio(matriz_feromonio, num_cidades, taxa_evaporacao, matriz_deposito):
     for i in range(num_cidades):
         for j in range(num_cidades):
@@ -47,6 +55,7 @@ def atualiza_nivel_feromonio(matriz_feromonio, num_cidades, taxa_evaporacao, mat
 
     return matriz_feromonio
 
+# Algoritmo de Colônia de Formigas para o problema do Caixeiro Viajante
 def algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromonio, num_iteracoes):
     melhor_caminho = None
     melhor_distancia = float('inf')
@@ -61,7 +70,9 @@ def algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromoni
 
             while cidades_nao_visitadas:
                 prob_transicao = calcula_prob_transicao(matriz_dist, matriz_feromonio, cidade_atual, cidades_nao_visitadas)
-                proxima_cidade = np.random.choice(cidades_nao_visitadas, p=prob_transicao) # Escolhe a próxima cidade com base na probabilidade
+                prob_cidades_nao_visitadas = prob_transicao[cidades_nao_visitadas] # Seleciona apenas as probabilidades das cidades não visitadas
+                prob_cidades_nao_visitadas = prob_cidades_nao_visitadas / prob_cidades_nao_visitadas.sum()
+                proxima_cidade = np.random.choice(cidades_nao_visitadas, p=prob_cidades_nao_visitadas)
                 caminho.append(proxima_cidade)
                 cidades_nao_visitadas.remove(proxima_cidade)
                 cidade_atual = proxima_cidade
@@ -74,13 +85,14 @@ def algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromoni
                 melhor_distancia = distancia_total
                 melhor_caminho = caminho
 
-        matriz_deposito = calcula_deposito_feromonio(caminho, feromonio_excretado)
+        matriz_deposito = calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado, matriz_dist)
 
         matriz_feromonio = atualiza_nivel_feromonio(matriz_feromonio, num_cidades, taxa_evaporacao, matriz_deposito)
 
     return melhor_caminho, melhor_distancia
 
 if __name__ == "__main__":
+    # Inicialização dos parâmetros do algoritmo
     arq = 'distancia_matrix.csv'
     num_formigas = 10
     num_iteracoes = 100
@@ -91,6 +103,12 @@ if __name__ == "__main__":
     num_cidades = len(matriz_dist[0])
 
     matriz_feromonio = inicializa_feromonio(num_cidades)
+
+    # Executa o algoritmo de colônia de formigas
+    melhor_caminho, melhor_distancia = algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromonio, num_iteracoes)
+    
+    print(f"Melhor caminho: {melhor_caminho}")
+    print(f"Melhor distância: {melhor_distancia}")
 
 
     
