@@ -1,6 +1,8 @@
 import csv
 import time
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # Le arquivo CSV e preenche a matriz de distâncias
 def preenche_matriz_dist(arq):
@@ -59,8 +61,11 @@ def atualiza_nivel_feromonio(matriz_feromonio, num_cidades, taxa_evaporacao, mat
 def algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromonio, num_iteracoes):
     melhor_caminho = None
     melhor_distancia = float('inf')
+    historico_melhor_distancia = [] # Para fazer o gráfico de evolução
 
     for _ in range(num_iteracoes):
+        caminhos = []
+        distancias = []
         for _ in range(num_formigas):
             caminho = []
             cidades_nao_visitadas = list(range(num_cidades))
@@ -79,17 +84,27 @@ def algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromoni
 
             # Calcula a distância total do caminho
             distancia_total = calcula_distancia_total(matriz_dist, caminho)
+            caminhos.append(caminho)
+            distancias.append(distancia_total)
 
             # Atualiza o melhor caminho e distância se necessário
             if distancia_total < melhor_distancia:
                 melhor_distancia = distancia_total
                 melhor_caminho = caminho
+            
+        # Soma o depósito de todas as formigas
+        matriz_deposito = np.zeros((num_cidades, num_cidades))
+        for caminho in caminhos:
+            matriz_deposito += calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado, matriz_dist)
 
-        matriz_deposito = calcula_deposito_feromonio(caminho, num_cidades, feromonio_excretado, matriz_dist)
+        # Elitismo: reforça o melhor caminho global
+        matriz_deposito += calcula_deposito_feromonio(melhor_caminho, num_cidades, feromonio_excretado * parametro_elitismo, matriz_dist)
 
         matriz_feromonio = atualiza_nivel_feromonio(matriz_feromonio, num_cidades, taxa_evaporacao, matriz_deposito)
 
-    return melhor_caminho, melhor_distancia
+        historico_melhor_distancia.append(melhor_distancia)  # Armazena a melhor distância de cada iteração
+
+    return melhor_caminho, melhor_distancia, historico_melhor_distancia
 
 if __name__ == "__main__":
     # Inicialização dos parâmetros do algoritmo
@@ -98,6 +113,7 @@ if __name__ == "__main__":
     num_iteracoes = 100
     taxa_evaporacao = 0.95
     feromonio_excretado = 50
+    parametro_elitismo = 1.5  # Fator de reforço para o melhor caminho encontrado
 
     matriz_dist = preenche_matriz_dist(arq)
     num_cidades = len(matriz_dist[0])
@@ -105,10 +121,17 @@ if __name__ == "__main__":
     matriz_feromonio = inicializa_feromonio(num_cidades)
 
     # Executa o algoritmo de colônia de formigas
-    melhor_caminho, melhor_distancia = algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromonio, num_iteracoes)
+    melhor_caminho, melhor_distancia, historico_ditancias = algoritmo_ant_colony(matriz_dist, num_cidades, num_formigas, matriz_feromonio, num_iteracoes)
     
     print(f"Melhor caminho: {melhor_caminho}")
     print(f"Melhor distância: {melhor_distancia}")
 
-
-    
+    # Gráfico da evolução das gerações
+    fig = plt.figure()
+    fig.canvas.manager.set_window_title('Algoritmo de Colônia de Formigas - Problema do Caixeiro Viajante')
+    plt.plot(historico_ditancias)
+    plt.xlabel('Geração')
+    plt.ylabel('Melhor distância encontrada')
+    plt.title('Evolução da melhor solução por geração')
+    plt.grid()
+    plt.show()
