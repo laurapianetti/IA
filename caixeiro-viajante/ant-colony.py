@@ -110,10 +110,10 @@ if __name__ == "__main__":
     # Inicialização dos parâmetros do algoritmo
     arq = 'distancia_matrix.csv'
     num_formigas = 10
-    num_iteracoes = 100
+    num_iteracoes = 200
     taxa_evaporacao = 0.95
     feromonio_excretado = 50
-    parametro_elitismo = 1.5  # Fator de reforço para o melhor caminho encontrado
+    parametro_elitismo = 2  # Fator de reforço para o melhor caminho encontrado
 
     matriz_dist = preenche_matriz_dist(arq)
     num_cidades = len(matriz_dist[0])
