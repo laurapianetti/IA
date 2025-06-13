@@ -1,8 +1,6 @@
 import csv
-import time
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # Le arquivo CSV e preenche a matriz de distâncias
 def preenche_matriz_dist(arq):
