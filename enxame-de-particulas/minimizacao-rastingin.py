@@ -1,3 +1,4 @@
+from matplotlib.animation import FuncAnimation
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,6 +35,9 @@ def enxame_de_particulas(num_particulas, num_iteracoes, w_min, w_max, c1, c2):
     # Inicializa melhores individuais e global
     melhores_individuais = posicoes.copy()
     melhor_global = posicoes[np.argmin([fitness(p) for p in posicoes])]    
+    historico_posicoes = [posicoes.copy()]
+    historico_melhor_global = [melhor_global.copy()]
+
     
     for it in range(num_iteracoes):
         for i in range(num_particulas):
@@ -48,8 +52,12 @@ def enxame_de_particulas(num_particulas, num_iteracoes, w_min, w_max, c1, c2):
         
         # Atualiza o melhor global
         melhor_global = melhores_individuais[np.argmin([fitness(p) for p in melhores_individuais])]    
-    
-    return melhor_global, fitness(melhor_global)
+        
+        historico_posicoes.append(posicoes.copy())
+        historico_melhor_global.append(melhor_global.copy())
+
+
+    return historico_posicoes, historico_melhor_global, melhor_global, fitness(melhor_global)
 
 if __name__ == "__main__":
     # Parâmetros do algoritmo
@@ -61,8 +69,40 @@ if __name__ == "__main__":
     w_max = 0.9  # Peso de inércia máximo
 
     # Executando o algoritmo de enxame de partículas
-    melhor_posicao, melhor_valor = enxame_de_particulas(num_particulas, num_iteracoes, w_min, w_max, c1, c2)
-    print(f"Melhor posição encontrada: {[f'{x:.2f}' for x in melhor_posicao]}")
-    print(f"Melhor valor da função Rastrigin: {melhor_valor:.2f}")
+    historico_posicoes, historico_melhor_global, melhor_posicao, melhor_valor = enxame_de_particulas(num_particulas, num_iteracoes, w_min, w_max, c1, c2)
+    print(f"Melhor posição encontrada: {[f'{x:.4f}' for x in melhor_posicao]}")
+    print(f"Melhor valor da função Rastrigin: {melhor_valor:.4f}")
 
+    # Plotando o resultado
+    x = np.linspace(-5.12, 5.12, 200)
+    y = np.linspace(-5.12, 5.12, 200)
+    X, Y = np.meshgrid(x, y)
+    Z = np.vectorize(lambda x, y: rastrigin([x, y]))(X, Y)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    cont = ax.contourf(X, Y, Z, levels=50, cmap='viridis')
+    plt.colorbar(cont, ax=ax)
+    scat = ax.scatter([], [], c='red', s=20, label='Partículas')
+    best, = ax.plot([], [], 'go', markersize=10, label='Melhor posição')
+    ax.set_xlim(-5.12, 5.12)
+    ax.set_ylim(-5.12, 5.12)
+    ax.set_title('Otimização PSO - Distribuição das partículas')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+
+    def update(frame):
+        pos = historico_posicoes[frame]
+        best_pos = historico_melhor_global[frame]
+        scat.set_offsets(pos[:, :2])
+        best.set_data([best_pos[0]], [best_pos[1]])
+        ax.set_title(f'Minimização Rastrigin')
+        return scat, best
+
+    anim = FuncAnimation(fig, update, frames=len(historico_posicoes), interval=100, blit=True)
+
+    # Para salvar como vídeo (requer ffmpeg)
+    anim.save('pso_rastrigin.mp4', writer='ffmpeg')
+
+    plt.show()
     
