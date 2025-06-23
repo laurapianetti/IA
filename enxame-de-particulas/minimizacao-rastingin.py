@@ -61,10 +61,10 @@ def enxame_de_particulas(num_particulas, num_iteracoes, w_min, w_max, c1, c2):
 
 if __name__ == "__main__":
     # Parâmetros do algoritmo
-    num_particulas = 1000  # Número de partículas na nuvem
+    num_particulas = 50  # Número de partículas na nuvem
     num_iteracoes = 100  # Número de iterações do algoritmo
-    c1 = 1  # Coeficiente cognitivo
-    c2 = 4  # Coeficiente social
+    c1 = 1.5  # Coeficiente cognitivo
+    c2 = 1.5  # Coeficiente social
     w_min = 0.4  # Peso de inércia mínimo
     w_max = 0.9  # Peso de inércia máximo
 
