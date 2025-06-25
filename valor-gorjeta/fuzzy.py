@@ -1,6 +1,8 @@
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Cria os antecedentes com o universo de discurso.
 comida = ctrl.Antecedent(np.linspace(0, 1, 100), 'comida')
@@ -63,3 +65,26 @@ if __name__ == "__main__":
 
     print(f"Menor gorjeta: {min(resultados):.2f}")
     print(f"Maior gorjeta: {max(resultados):.2f}")
+
+    # Representando a superfície 3D
+    x = np.linspace(0, 1, 30)  # comida
+    y = np.linspace(0, 1, 30)  # servico
+    X, Y = np.meshgrid(x, y)
+    Z = np.zeros_like(X)
+
+    for i in range(X.shape[0]):
+        for j in range(X.shape[1]):
+            gorjeta_simulation.input['comida'] = X[i, j]
+            gorjeta_simulation.input['servico'] = Y[i, j]
+            gorjeta_simulation.compute()
+            Z[i, j] = gorjeta_simulation.output['gorjeta']
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
+    ax.set_xlabel('Qualidade da Comida')
+    ax.set_ylabel('Qualidade do Serviço')
+    ax.set_zlabel('Gorjeta')
+    ax.set_title('Superfície Fuzzy para Gorjeta')
+    plt.savefig("superficie_gorjeta.png", dpi=300)
+    plt.show()
