@@ -1,5 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 def cria_conjunto_dados():
